@@ -12,6 +12,7 @@
 namespace Gordalina\MixpanelBundle\Security;
 
 use Gordalina\MixpanelBundle\ManagerRegistry;
+use Gordalina\MixpanelBundle\Mixpanel\Flusher;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class Authentication
@@ -27,13 +28,19 @@ class Authentication
     private $userData;
 
     /**
+     * @var Flusher
+     */
+    private $flusher;
+
+    /**
      * @param ManagerRegistry $managerRegistry
      * @param UserData        $userData
      */
-    public function __construct(ManagerRegistry $registry, UserData $userData)
+    public function __construct(ManagerRegistry $registry, UserData $userData, Flusher $flusher)
     {
         $this->registry = $registry;
         $this->userData = $userData;
+        $this->flusher  = $flusher;
     }
 
     /**
@@ -60,7 +67,7 @@ class Authentication
      */
     public function onAuthenticationFailure()
     {
-        $this->registry->flush();
+        $this->flusher->flush();
 
         foreach ($this->registry->getProjects() as $project) {
             // clear identity
